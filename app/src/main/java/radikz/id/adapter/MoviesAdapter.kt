@@ -11,9 +11,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import radikz.id.R
 import radikz.id.model.Movie
 
-class MoviesAdapter(
-    private var movies: List<Movie>
-) : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
+class MoviesAdapter(private var movies: MutableList<Movie>) : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val view = LayoutInflater
@@ -22,9 +20,17 @@ class MoviesAdapter(
         return MovieViewHolder(view)
     }
 
-    fun updateMovies(movies: List<Movie>) {
-        this.movies = movies
-        notifyDataSetChanged()
+//    fun updateMovies(movies: List<Movie>) {
+//        this.movies = movies
+//        notifyDataSetChanged()
+//    }
+
+    fun appendMovies(movies: List<Movie>) {
+        this.movies.addAll(movies)
+        notifyItemRangeInserted(
+            this.movies.size,
+            movies.size - 1
+        )
     }
 
     override fun getItemCount(): Int = movies.size

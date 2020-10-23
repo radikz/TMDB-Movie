@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,19 +16,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var popularMovies: RecyclerView
     private lateinit var popularMoviesAdapter: MoviesAdapter
     private lateinit var progressBar: ProgressBar
+    private lateinit var popularMoviesLayoutMgr: LinearLayoutManager
+    private lateinit var textPage: TextView
+
+    private var popularMoviesPage = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         popularMovies = findViewById(R.id.popular_movies)
-        popularMovies.layoutManager = LinearLayoutManager(this)
-        popularMoviesAdapter = MoviesAdapter(listOf())
+        popularMoviesLayoutMgr = LinearLayoutManager(this)
+        popularMovies.layoutManager = popularMoviesLayoutMgr
+        popularMoviesAdapter = MoviesAdapter(mutableListOf())
         popularMovies.adapter = popularMoviesAdapter
 
+        textPage = findViewById(R.id.pagination_movies)
         progressBar = findViewById(R.id.progress_movies)
 
+        getPopularMovies()
+    }
+
+    private fun getPopularMovies(){
         MoviesRepository.getPopularMovies(
+            popularMoviesPage,
             onSuccess = { movies ->
                 onPopularMoviesFetched(movies)
                 progressBar.setVisibility(View.GONE)
@@ -38,9 +50,29 @@ class MainActivity : AppCompatActivity() {
                 progressBar.setVisibility(View.GONE)
             }
         )
+
     }
 
     private fun onPopularMoviesFetched(movies: List<Movie>) {
-        popularMoviesAdapter.updateMovies(movies)
+        popularMoviesAdapter.appendMovies(movies)
+        attachPopularMoviesOnScrollListener()
+    }
+
+    private fun attachPopularMoviesOnScrollListener() {
+        popularMovies.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val totalItemCount = popularMoviesLayoutMgr.itemCount
+                val visibleItemCount = popularMoviesLayoutMgr.childCount
+                val firstVisibleItem = popularMoviesLayoutMgr.findFirstVisibleItemPosition()
+                var page = firstVisibleItem / 20 + 1
+                textPage.setText(getString(R.string.pagination_movies).plus(page))
+
+                if (firstVisibleItem + visibleItemCount == totalItemCount) {
+                    popularMovies.removeOnScrollListener(this)
+                    popularMoviesPage++
+                    getPopularMovies()
+                }
+            }
+        })
     }
 }
