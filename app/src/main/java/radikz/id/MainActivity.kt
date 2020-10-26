@@ -1,5 +1,6 @@
 package radikz.id
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         popularMovies = findViewById(R.id.popular_movies)
         popularMoviesLayoutMgr = LinearLayoutManager(this)
         popularMovies.layoutManager = popularMoviesLayoutMgr
-        popularMoviesAdapter = MoviesAdapter(mutableListOf())
+        popularMoviesAdapter = MoviesAdapter(mutableListOf(), { movie -> showMovieDetails(movie) })
         popularMovies.adapter = popularMoviesAdapter
 
         textPage = findViewById(R.id.pagination_movies)
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 val totalItemCount = popularMoviesLayoutMgr.itemCount
                 val visibleItemCount = popularMoviesLayoutMgr.childCount
                 val firstVisibleItem = popularMoviesLayoutMgr.findFirstVisibleItemPosition()
-                var page = firstVisibleItem / 20 + 1
+                val page = firstVisibleItem / 20 + 1
                 textPage.setText(getString(R.string.pagination_movies).plus(page))
 
                 if (firstVisibleItem + visibleItemCount == totalItemCount) {
@@ -74,5 +75,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun showMovieDetails(movie: Movie) {
+        val intent = Intent(this, MovieDetail::class.java)
+        intent.putExtra(MOVIE_BACKDROP, movie.backdropPath)
+        intent.putExtra(MOVIE_POSTER, movie.posterPath)
+        intent.putExtra(MOVIE_TITLE, movie.title)
+        intent.putExtra(MOVIE_RATING, movie.rating)
+        intent.putExtra(MOVIE_RELEASE_DATE, movie.releaseDate)
+        intent.putExtra(MOVIE_OVERVIEW, movie.overview)
+        startActivity(intent)
     }
 }
