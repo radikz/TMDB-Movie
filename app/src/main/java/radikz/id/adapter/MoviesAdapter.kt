@@ -11,7 +11,10 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import radikz.id.R
 import radikz.id.model.Movie
 
-class MoviesAdapter(private var movies: MutableList<Movie>) : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
+class MoviesAdapter(
+    private var movies: MutableList<Movie>,
+    private val onMovieClick: (movie: Movie) -> Unit
+) : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val view = LayoutInflater
@@ -19,11 +22,6 @@ class MoviesAdapter(private var movies: MutableList<Movie>) : RecyclerView.Adapt
             .inflate(R.layout.item_movie, parent, false)
         return MovieViewHolder(view)
     }
-
-//    fun updateMovies(movies: List<Movie>) {
-//        this.movies = movies
-//        notifyDataSetChanged()
-//    }
 
     fun appendMovies(movies: List<Movie>) {
         this.movies.addAll(movies)
@@ -53,8 +51,9 @@ class MoviesAdapter(private var movies: MutableList<Movie>) : RecyclerView.Adapt
                 .into(poster)
 
             title.setText(movie.title)
-            rating.setText((movie.rating).toString())
+            rating.setText((movie.rating / 2).toString().plus(" / 5.0"))
             releaseDate.setText(movie.releaseDate)
+            itemView.setOnClickListener { onMovieClick.invoke(movie) }
         }
     }
 }
